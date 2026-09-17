@@ -13,16 +13,16 @@ cd ..
 
 echo "📦 Installing client dependencies..."
 cd client
-npm install
+npm install --include=dev
 echo "🔨 Building client..."
-npm run build
+npx vite build
 cd ..
 
 echo "📦 Installing admin dependencies..."
 cd admin
-npm install
+npm install --include=dev
 echo "🔨 Building admin..."
-npm run build
+npx vite build
 cd ..
 
 echo "✅ Build completed successfully!"

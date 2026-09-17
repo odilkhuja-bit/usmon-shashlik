@@ -4,19 +4,23 @@
   "description": "USMON SHASHLIK — Telegram Mini App + Admin Panel + Node.js Backend",
   "private": true,
   "scripts": {
-    "install:all": "cd backend && npm install && cd ../client && npm install && cd ../admin && npm install",
-    "build:client": "cd client && npm run build",
-    "build:admin": "cd admin && npm run build",
+    "install:all": "npm --prefix backend install && npm --prefix client install && npm --prefix admin install",
+    "build:client": "npm --prefix client run build",
+    "build:admin": "npm --prefix admin run build",
     "build": "npm run build:client && npm run build:admin",
-    "start": "cd backend && npm start",
-    "dev:backend": "cd backend && npm run dev",
-    "dev:client": "cd client && npm run dev",
-    "dev:admin": "cd admin && npm run dev",
-    "db:push": "cd backend && npx prisma db push",
-    "db:generate": "cd backend && npx prisma generate",
-    "db:seed": "cd backend && node prisma/seed.js",
-    "render:build": "npm run install:all && npm run db:generate && npm run build",
-    "render:start": "cd backend && npx prisma db push --accept-data-loss && node prisma/seed.js && npm start"
+    "start": "npm --prefix backend start",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:client": "npm --prefix client run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "db:generate": "npx --prefix backend prisma generate --schema=backend/prisma/schema.prisma",
+    "db:push": "npx prisma db push --schema=backend/prisma/schema.prisma",
+    "db:seed": "node backend/prisma/seed.js",
+    "render:build": "npm run install:all && npx prisma generate --schema=backend/prisma/schema.prisma && npm run build",
+    "render:start": "npx prisma db push --schema=backend/prisma/schema.prisma && node backend/prisma/seed.js && node backend/src/index.js"
+  },
+  "dependencies": {
+    "prisma": "^6.9.0",
+    "@prisma/client": "^6.9.0"
   },
   "keywords": [
     "telegram-mini-app",

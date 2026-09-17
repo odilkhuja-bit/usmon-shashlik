@@ -1,0 +1,25 @@
+{
+  "name": "usmon-shashlik",
+  "version": "1.0.0",
+  "description": "USMON SHASHLIK — Telegram Mini App + Admin Panel + Node.js Backend",
+  "private": true,
+  "scripts": {
+    "install:all": "npm --prefix backend install && npm --prefix client install && npm --prefix admin install",
+    "backend": "npm --prefix backend run dev",
+    "client": "npm --prefix client run dev",
+    "admin": "npm --prefix admin run dev",
+    "db:push": "npx --prefix backend prisma db push",
+    "db:generate": "npx --prefix backend prisma generate",
+    "db:seed": "node backend/prisma/seed.js"
+  },
+  "keywords": [
+    "telegram-mini-app",
+    "restaurant",
+    "shashlik",
+    "admin-panel",
+    "nodejs",
+    "react"
+  ],
+  "author": "USMON SHASHLIK",
+  "license": "ISC"
+}

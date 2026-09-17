@@ -1,0 +1,208 @@
+// ============================================
+// USMON SHASHLIK — Prisma Schema (SQLite)
+// ============================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ─── Models ──────────────────────────────────
+
+model User {
+  id               Int            @id @default(autoincrement())
+  telegramId       BigInt         @unique
+  firstName        String?
+  lastName         String?
+  username         String?
+  phone            String?
+  language         String         @default("uz")
+  latitude         Float?
+  longitude        Float?
+  selectedBranchId Int?
+  isBlocked        Boolean        @default(false)
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt
+
+  selectedBranch   Branch?        @relation(fields: [selectedBranchId], references: [id], onDelete: SetNull)
+  orders           Order[]
+  favorites        Favorite[]
+  broadcastLogs    BroadcastLog[]
+
+  @@map("users")
+}
+
+model Branch {
+  id            Int       @id @default(autoincrement())
+  name          String
+  nameRu        String?
+  address       String
+  addressRu     String?
+  phone         String?
+  latitude      Float
+  longitude     Float
+  workingHours  String    @default("09:00-23:00")
+  isActive      Boolean   @default(true)
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  users         User[]
+  orders        Order[]
+  admins        Admin[]
+
+  @@map("branches")
+}
+
+model Category {
+  id          Int       @id @default(autoincrement())
+  nameUz      String
+  nameRu      String
+  slug        String    @unique
+  icon        String?
+  sortOrder   Int       @default(0)
+  isActive    Boolean   @default(true)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  products    Product[]
+
+  @@map("categories")
+}
+
+model Product {
+  id              Int        @id @default(autoincrement())
+  nameUz          String
+  nameRu          String
+  descriptionUz   String?
+  descriptionRu   String?
+  imageUrl        String?
+  oldPrice        Int?
+  price           Int
+  categoryId      Int
+  ingredientsUz   String?
+  ingredientsRu   String?
+  isAvailable     Boolean    @default(true)
+  isDeleted       Boolean    @default(false)
+  isUpsell        Boolean    @default(false)
+  sortOrder       Int        @default(0)
+  createdAt       DateTime   @default(now())
+  updatedAt       DateTime   @updatedAt
+
+  category        Category   @relation(fields: [categoryId], references: [id], onDelete: Restrict)
+  favorites       Favorite[]
+
+  @@map("products")
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  orderNumber     String        @unique
+  userId          Int
+  branchId        Int
+  items           Json
+  subtotal        Int
+  deliveryPrice   Int           @default(0)
+  total           Int
+  deliveryType    String        @default("DELIVERY")
+  address         String?
+  latitude        Float?
+  longitude       Float?
+  comment         String?
+  phone           String?
+  status          String        @default("NEW")
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+
+  user            User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  branch          Branch        @relation(fields: [branchId], references: [id], onDelete: Restrict)
+
+  @@map("orders")
+}
+
+model Admin {
+  id            Int        @id @default(autoincrement())
+  username      String     @unique
+  passwordHash  String
+  name          String
+  role          String     @default("OPERATOR")
+  branchId      Int?
+  isActive      Boolean    @default(true)
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  branch        Branch?    @relation(fields: [branchId], references: [id], onDelete: SetNull)
+
+  @@map("admins")
+}
+
+model Broadcast {
+  id            Int              @id @default(autoincrement())
+  title         String
+  message       String
+  imageUrl      String?
+  buttonText    String?
+  buttonUrl     String?
+  targetFilter  String?
+  status        String           @default("PENDING")
+  totalUsers    Int              @default(0)
+  sentCount     Int              @default(0)
+  failedCount   Int              @default(0)
+  createdAt     DateTime         @default(now())
+  completedAt   DateTime?
+
+  logs          BroadcastLog[]
+
+  @@map("broadcasts")
+}
+
+model BroadcastLog {
+  id            Int       @id @default(autoincrement())
+  broadcastId   Int
+  userId        Int
+  status        String    @default("pending")
+  error         String?
+  sentAt        DateTime?
+
+  broadcast     Broadcast @relation(fields: [broadcastId], references: [id], onDelete: Cascade)
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("broadcast_logs")
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@map("favorites")
+}
+
+model Setting {
+  id    Int    @id @default(autoincrement())
+  key   String @unique
+  value String
+
+  @@map("settings")
+}
+
+model Story {
+  id          Int      @id @default(autoincrement())
+  title       String
+  imageUrl    String
+  bgColor     String?  @default("#E85D04")
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("stories")
+}

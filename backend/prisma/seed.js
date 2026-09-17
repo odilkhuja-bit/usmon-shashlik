@@ -64,6 +64,8 @@ async function main() {
   const branch2 = await prisma.branch.upsert({
     where: { id: 2 },
     update: {
+      address: '989G+FMH, Toshkent, Toshkent Viloyati',
+      addressRu: '989G+FMH, Ташкент, Ташкентская область',
       phone: '+998 70 029 93 93',
       latitude: 41.285800,
       longitude: 69.209300,
@@ -71,8 +73,8 @@ async function main() {
     create: {
       name: 'USMON SHASHLIK — Yunusobod',
       nameRu: 'УСМОН ШАШЛЫК — Юнусабад',
-      address: 'Yunusobod tumani, Amir Temur ko\'chasi 108',
-      addressRu: 'Юнусабадский район, ул. Амира Темура 108',
+      address: '989G+FMH, Toshkent, Toshkent Viloyati',
+      addressRu: '989G+FMH, Ташкент, Ташкентская область',
       phone: '+998 70 029 93 93',
       latitude: 41.285800,
       longitude: 69.209300,

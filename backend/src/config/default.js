@@ -1,10 +1,11 @@
 require('dotenv').config();
 
 const config = {
-  port: parseInt(process.env.BACKEND_PORT) || 5000,
+  port: parseInt(process.env.BACKEND_PORT) || parseInt(process.env.PORT) || 5000,
   clientUrl: process.env.CLIENT_URL || 'http://localhost:3000',
   adminUrl: process.env.ADMIN_URL || 'http://localhost:3001',
   ngrokUrl: process.env.NGROK_URL || '',
+  nodeEnv: process.env.NODE_ENV || 'development',
   jwt: {
     secret: process.env.JWT_SECRET || 'default-secret-change-me',
     expiresIn: '7d',

@@ -1,5 +1,5 @@
 // ============================================
-// USMON SHASHLIK — Prisma Schema (SQLite)
+// USMON SHASHLIK — Prisma Schema (PostgreSQL)
 // ============================================
 
 generator client {
@@ -7,7 +7,7 @@ generator client {
 }
 
 datasource db {
-  provider = "sqlite"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 

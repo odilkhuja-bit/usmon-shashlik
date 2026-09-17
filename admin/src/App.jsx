@@ -41,7 +41,7 @@ export default function App() {
   const [lang, setLang] = useState('uz');
 
   return (
-    <BrowserRouter>
+    <BrowserRouter basename={import.meta.env.BASE_URL}>
       <AuthProvider>
         <ToastProvider>
           <Routes>

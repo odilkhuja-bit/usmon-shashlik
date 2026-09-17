@@ -98,9 +98,9 @@ async function adminGetOrders(req, res, next) {
     }
     if (search) {
       where.OR = [
-        { orderNumber: { contains: search } },
-        { phone: { contains: search } },
-        { user: { firstName: { contains: search } } },
+        { orderNumber: { contains: search, mode: 'insensitive' } },
+        { phone: { contains: search, mode: 'insensitive' } },
+        { user: { firstName: { contains: search, mode: 'insensitive' } } },
       ];
     }
 

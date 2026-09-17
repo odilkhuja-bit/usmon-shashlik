@@ -9,6 +9,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const http = require('http');
+const path = require('path');
 const { Server } = require('socket.io');
 const config = require('./config/default');
 const logger = require('./utils/logger');
@@ -51,7 +52,10 @@ io.on('connection', (socket) => {
 });
 
 // ─── Middleware ──────────────────────────────
-app.use(helmet({ crossOriginResourcePolicy: false }));
+app.use(helmet({
+  crossOriginResourcePolicy: false,
+  contentSecurityPolicy: false,
+}));
 app.use(cors({
   origin: true,
   credentials: true,
@@ -78,7 +82,7 @@ express.response.json = function (obj) {
   ));
 };
 
-// ─── Routes ─────────────────────────────────
+// ─── API Routes ─────────────────────────────
 app.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', service: 'usmon-shashlik-api', timestamp: new Date().toISOString() });
 });
@@ -87,9 +91,34 @@ app.use('/api/client', clientRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/admin', adminRoutes);
 
-// ─── Error Handling ─────────────────────────
-app.use(notFound);
-app.use(errorHandler);
+// ─── Production: Serve Static Files ─────────
+const isProduction = config.nodeEnv === 'production';
+
+if (isProduction) {
+  const publicDir = path.join(__dirname, '..', 'public');
+
+  // Serve Admin Panel at /admin
+  const adminDir = path.join(publicDir, 'admin');
+  app.use('/admin', express.static(adminDir));
+  app.get('/admin/*', (_req, res) => {
+    res.sendFile(path.join(adminDir, 'index.html'));
+  });
+
+  // Serve Client Mini App at / (must be last)
+  const clientDir = path.join(publicDir, 'client');
+  app.use(express.static(clientDir));
+  app.get('*', (req, res, next) => {
+    // Don't serve HTML for API routes
+    if (req.path.startsWith('/api/') || req.path.startsWith('/socket.io/')) {
+      return next();
+    }
+    res.sendFile(path.join(clientDir, 'index.html'));
+  });
+} else {
+  // ─── Development: Error Handling ────────────
+  app.use(notFound);
+  app.use(errorHandler);
+}
 
 // ─── Start Server ───────────────────────────
 const PORT = config.port;
@@ -97,6 +126,12 @@ const PORT = config.port;
 server.listen(PORT, () => {
   logger.info(`🚀 Server running on http://localhost:${PORT}`);
   logger.info(`📋 API: http://localhost:${PORT}/api/health`);
+  logger.info(`🌍 Environment: ${config.nodeEnv}`);
+
+  if (isProduction) {
+    logger.info(`🍢 Client: http://localhost:${PORT}/`);
+    logger.info(`📊 Admin: http://localhost:${PORT}/admin`);
+  }
 
   // Initialize Telegram Bot
   initBot();

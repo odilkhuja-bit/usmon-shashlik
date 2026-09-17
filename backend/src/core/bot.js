@@ -68,7 +68,8 @@ function initBot() {
         ru: '🍢 МЕНЮ УСМОН ШАШЛЫК',
       };
 
-      const miniAppUrl = config.ngrokUrl || config.clientUrl;
+      // Production: use RENDER_EXTERNAL_URL, else ngrokUrl, else clientUrl
+      const miniAppUrl = process.env.RENDER_EXTERNAL_URL || config.ngrokUrl || config.clientUrl;
 
       await bot.sendMessage(chatId, messages[lang] || messages.uz, {
         parse_mode: 'HTML',

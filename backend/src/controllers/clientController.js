@@ -94,8 +94,8 @@ async function getProducts(req, res, next) {
     if (categoryId) where.categoryId = parseInt(categoryId);
     if (search) {
       where.OR = [
-        { nameUz: { contains: search } },
-        { nameRu: { contains: search } },
+        { nameUz: { contains: search, mode: 'insensitive' } },
+        { nameRu: { contains: search, mode: 'insensitive' } },
       ];
     }
 

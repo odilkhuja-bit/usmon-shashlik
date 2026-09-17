@@ -3,13 +3,15 @@
 // ============================================
 
 import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useApp } from '../context/AppContext';
 import { t, getBranchName, getBranchAddress } from '../utils/i18n';
 import { calculateDistance, formatDistance } from '../utils/helpers';
 import { haptic } from '../utils/telegram';
 
 export default function BranchSelect({ onSelect }) {
-  const { branches, language } = useApp();
+  const { branches, language, selectBranch } = useApp();
+  const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState(null);
   const [sortedBranches, setSortedBranches] = useState([]);
 
@@ -41,7 +43,12 @@ export default function BranchSelect({ onSelect }) {
 
   const handleSelect = (branch) => {
     haptic('medium');
-    onSelect(branch);
+    if (onSelect) {
+      onSelect(branch);
+    } else {
+      selectBranch(branch);
+      navigate('/menu', { replace: true });
+    }
   };
 
   const openMap = (branch, e) => {

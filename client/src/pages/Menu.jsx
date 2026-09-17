@@ -14,7 +14,7 @@ import ProductSheet from '../components/ProductSheet';
 
 export default function Menu() {
   const { language, categories } = useApp();
-  const { addItem } = useCart();
+  const { items, addItem, updateQuantity } = useCart();
   const { showToast } = useToast();
   const [products, setProducts] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -135,9 +135,21 @@ export default function Menu() {
                       <span className="product-card-price">{formatPrice(product.price)}</span>
                       {product.oldPrice && <span className="product-card-old-price">{formatPrice(product.oldPrice)}</span>}
                     </div>
-                    {product.isAvailable !== false && (
-                      <button className="product-card-add" onClick={(e) => handleQuickAdd(e, product)}>+</button>
-                    )}
+                    {product.isAvailable !== false && (() => {
+                      const cartItem = items.find(i => i.productId === product.id);
+                      if (cartItem) {
+                        return (
+                          <div className="qty-selector" onClick={(e) => e.stopPropagation()} style={{ transform: 'scale(0.8)', margin: '-5px -10px' }}>
+                            <button className="qty-btn" onClick={() => { updateQuantity(product.id, cartItem.quantity - 1); haptic('light'); }}>−</button>
+                            <span className="qty-value">{cartItem.quantity}</span>
+                            <button className="qty-btn" onClick={() => { updateQuantity(product.id, cartItem.quantity + 1); haptic('light'); }}>+</button>
+                          </div>
+                        );
+                      }
+                      return (
+                        <button className="product-card-add" onClick={(e) => handleQuickAdd(e, product)}>+</button>
+                      );
+                    })()}
                   </div>
                 </div>
                 {product.isAvailable === false && (

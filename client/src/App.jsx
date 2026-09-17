@@ -28,14 +28,8 @@ function NavigationGuard({ children }) {
   useEffect(() => {
     if (loading) return;
 
-    const onboarded = localStorage.getItem('usmon_onboarded');
-    if (!onboarded && location.pathname !== '/onboarding') {
-      navigate('/onboarding', { replace: true });
-      return;
-    }
-
-    // If onboarded but no branch selected and not on branch-select or onboarding
-    if (onboarded && !selectedBranch && location.pathname !== '/branch-select' && location.pathname !== '/onboarding') {
+    // If no branch selected and not on branch-select
+    if (!selectedBranch && location.pathname !== '/branch-select') {
       navigate('/branch-select', { replace: true });
     }
   }, [loading, selectedBranch, location.pathname, navigate]);

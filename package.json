@@ -4,23 +4,11 @@
   "description": "USMON SHASHLIK — Telegram Mini App + Admin Panel + Node.js Backend",
   "private": true,
   "scripts": {
-    "install:all": "npm --prefix backend install && npm --prefix client install && npm --prefix admin install",
-    "build:client": "npm --prefix client run build",
-    "build:admin": "npm --prefix admin run build",
-    "build": "npm run build:client && npm run build:admin",
-    "start": "npm --prefix backend start",
     "dev:backend": "npm --prefix backend run dev",
     "dev:client": "npm --prefix client run dev",
     "dev:admin": "npm --prefix admin run dev",
-    "db:generate": "npx --prefix backend prisma generate --schema=backend/prisma/schema.prisma",
-    "db:push": "npx prisma db push --schema=backend/prisma/schema.prisma",
-    "db:seed": "node backend/prisma/seed.js",
-    "render:build": "npm run install:all && npx prisma generate --schema=backend/prisma/schema.prisma && npm run build",
-    "render:start": "npx prisma db push --schema=backend/prisma/schema.prisma && node backend/prisma/seed.js && node backend/src/index.js"
-  },
-  "dependencies": {
-    "prisma": "^6.9.0",
-    "@prisma/client": "^6.9.0"
+    "render:build": "chmod +x render-build.sh && ./render-build.sh",
+    "render:start": "chmod +x render-start.sh && ./render-start.sh"
   },
   "keywords": [
     "telegram-mini-app",

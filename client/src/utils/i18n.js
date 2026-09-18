@@ -81,12 +81,12 @@ const translations = {
 
     // Profile
     profile: 'Profil',
-    order_history: '📜 Mening buyurtmalarim',
-    change_branch_menu: '📍 Filialni almashtirish',
+    order_history: 'Mening buyurtmalarim',
+    change_branch_menu: 'Filialni almashtirish',
     language: '🌐 Til',
-    contact: '📞 Aloqa',
-    about: 'ℹ️ Biz haqimizda',
-    favorites: '❤️ Sevimlilar',
+    contact: 'Aloqa',
+    about: 'Biz haqimizda',
+    favorites: 'Sevimlilar',
 
     // Nav
     nav_home: 'Bosh sahifa',
@@ -180,12 +180,12 @@ const translations = {
 
     // Profile
     profile: 'Профиль',
-    order_history: '📜 Мои заказы',
-    change_branch_menu: '📍 Сменить филиал',
+    order_history: 'Мои заказы',
+    change_branch_menu: 'Сменить филиал',
     language: '🌐 Язык',
-    contact: '📞 Контакты',
-    about: 'ℹ️ О нас',
-    favorites: '❤️ Избранное',
+    contact: 'Контакты',
+    about: 'О нас',
+    favorites: 'Избранное',
 
     // Nav
     nav_home: 'Главная',

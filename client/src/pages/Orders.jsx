@@ -39,11 +39,14 @@ export default function Orders() {
 
   const getStatusClass = (status) => {
     switch (status) {
+      case 'NEW': return 'badge-info';
+      case 'CONFIRMED': return 'badge-purple';
+      case 'PREPARING': return 'badge-warning';
+      case 'READY': return 'badge-success';
+      case 'DELIVERING': return 'badge-info';
       case 'COMPLETED': return 'badge-success';
       case 'CANCELLED': return 'badge-danger';
-      case 'DELIVERING':
-      case 'READY': return 'badge-info';
-      default: return 'badge-warning';
+      default: return 'badge-info';
     }
   };
 

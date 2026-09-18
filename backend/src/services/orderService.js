@@ -57,11 +57,11 @@ async function createOrder(userId, orderData, io) {
     );
   }
 
-  const orderNumber = generateOrderNumber();
+  const tempOrderNumber = generateOrderNumber();
 
-  const order = await prisma.order.create({
+  let order = await prisma.order.create({
     data: {
-      orderNumber,
+      orderNumber: tempOrderNumber,
       userId,
       branchId,
       items: orderItems,
@@ -82,7 +82,15 @@ async function createOrder(userId, orderData, io) {
     },
   });
 
-  logger.info('Order created', { orderNumber, userId, total });
+  const realOrderNumber = `USM-${String(order.id).padStart(4, '0')}`;
+  
+  order = await prisma.order.update({
+    where: { id: order.id },
+    data: { orderNumber: realOrderNumber },
+    include: { user: true, branch: true }
+  });
+
+  logger.info('Order created', { orderNumber: order.orderNumber, userId, total });
 
   // Send Telegram notification to user
   try {

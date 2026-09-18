@@ -31,6 +31,7 @@ export default function Checkout() {
     { type: 'DELIVERY', label: t('delivery', language) },
     { type: 'PICKUP', label: t('pickup', language) },
     { type: 'DINE_IN', label: t('dine_in', language) },
+    { type: 'YANDEX', label: t('yandex', language) },
   ];
 
   const handleSubmit = async () => {
@@ -38,7 +39,7 @@ export default function Checkout() {
 
     if (!name.trim()) { setError(language === 'ru' ? 'Введите имя' : 'Ismingizni kiriting'); return; }
     if (!phone.trim()) { setError(language === 'ru' ? 'Введите телефон' : 'Telefon raqamingizni kiriting'); return; }
-    if (deliveryType === 'DELIVERY' && !address.trim()) { setError(language === 'ru' ? 'Введите адрес' : 'Manzilingizni kiriting'); return; }
+    if ((deliveryType === 'DELIVERY' || deliveryType === 'YANDEX') && !address.trim()) { setError(language === 'ru' ? 'Введите адрес' : 'Manzilingizni kiriting'); return; }
     if (!selectedBranch) { setError(language === 'ru' ? 'Выберите филиал' : 'Filialni tanlang'); return; }
 
     try {
@@ -53,7 +54,7 @@ export default function Checkout() {
         branchId: selectedBranch.id,
         deliveryType,
         phone: phone.trim(),
-        address: deliveryType === 'DELIVERY' ? address.trim() : null,
+        address: (deliveryType === 'DELIVERY' || deliveryType === 'YANDEX') ? address.trim() : null,
         comment: comment.trim() || null,
       };
 
@@ -112,8 +113,8 @@ export default function Checkout() {
         </div>
       </div>
 
-      {/* Address (only for delivery) */}
-      {deliveryType === 'DELIVERY' && (
+      {/* Address (only for delivery or yandex) */}
+      {(deliveryType === 'DELIVERY' || deliveryType === 'YANDEX') && (
         <div className="input-group">
           <label className="input-label">{t('address', language)}</label>
           <textarea
@@ -122,6 +123,12 @@ export default function Checkout() {
             onChange={(e) => setAddress(e.target.value)}
             placeholder={language === 'ru' ? 'Район, улица, дом, квартира' : 'Tuman, ko\'cha, uy, xonadon'}
           />
+        </div>
+      )}
+
+      {deliveryType === 'YANDEX' && (
+        <div className="alert-message" style={{ background: 'rgba(245, 158, 11, 0.1)', color: '#f59e0b', padding: '12px', borderRadius: '8px', fontSize: '13px', marginTop: '10px' }}>
+          ⚠️ {language === 'ru' ? 'Внимание: При выборе доставки через Yandex, необходимо связаться с администратором для предварительной оплаты.' : 'Diqqat: Yandex orqali yetkazib berish tanlanganda, to\'lovni oldindan amalga oshirish uchun admin bilan bog\'lanishingiz kerak.'}
         </div>
       )}
 

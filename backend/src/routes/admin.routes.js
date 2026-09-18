@@ -36,7 +36,7 @@ router.get('/orders', order.adminGetOrders);
 router.get('/orders/export', order.exportOrdersCsv);
 router.get('/orders/:id', order.adminGetOrder);
 router.patch('/orders/:id', order.adminUpdateStatus);
-
+router.patch('/orders/:id/items', order.adminUpdateOrderItems);
 // ─── Products ────────────────────────────────
 router.get('/products', product.getAll);
 router.get('/products/:id', product.getOne);

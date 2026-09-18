@@ -235,6 +235,64 @@ async function exportOrdersCsv(req, res, next) {
   }
 }
 
+/**
+ * Update order items (admin edit)
+ */
+async function adminUpdateOrderItems(req, res, next) {
+  try {
+    const { items, deliveryPrice } = req.body;
+    
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({ error: 'Items cannot be empty' });
+    }
+
+    const orderId = parseInt(req.params.id);
+    const order = await prisma.order.findUnique({ where: { id: orderId } });
+    if (!order) return res.status(404).json({ error: 'Order not found' });
+
+    let subtotal = 0;
+    for (const item of items) {
+      subtotal += item.price * item.quantity;
+    }
+    
+    const finalDeliveryPrice = deliveryPrice !== undefined ? deliveryPrice : order.deliveryPrice;
+    const total = subtotal + finalDeliveryPrice;
+
+    const { PrismaClient } = require('@prisma/client');
+    const prismaLocal = new PrismaClient();
+    
+    const updatedOrder = await prismaLocal.order.update({
+      where: { id: orderId },
+      data: {
+        items,
+        subtotal,
+        deliveryPrice: finalDeliveryPrice,
+        total,
+      },
+      include: {
+        user: true,
+        branch: true
+      }
+    });
+
+    const { sendMessage } = require('./../services/telegramService');
+    const { formatPrice } = require('./../utils/helpers');
+    const lang = updatedOrder.user.language || 'uz';
+    const msg = lang === 'ru' 
+      ? `⚠️ Ваш заказ <b>#${updatedOrder.orderNumber}</b> был изменён администратором.\n\nНовая сумма: <b>${formatPrice(total)} сум</b>.`
+      : `⚠️ Sizning <b>#${updatedOrder.orderNumber}</b> buyurtmangiz admin tomonidan tahrirlandi.\n\nYangi summa: <b>${formatPrice(total)} so'm</b>.`;
+    
+    await sendMessage(updatedOrder.user.telegramId.toString(), msg);
+
+    res.json({
+      ...updatedOrder,
+      user: updatedOrder.user ? { ...updatedOrder.user, telegramId: updatedOrder.user.telegramId.toString() } : null
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   create,
   getUserOrders,
@@ -242,5 +300,6 @@ module.exports = {
   adminGetOrders,
   adminGetOrder,
   adminUpdateStatus,
+  adminUpdateOrderItems,
   exportOrdersCsv,
 };

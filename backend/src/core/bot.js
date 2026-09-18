@@ -22,13 +22,44 @@ function initBot() {
 
   logger.info('🤖 Telegram Bot started');
 
+  const botStates = new Map(); // chatId -> state name
+
+  async function sendMenu(botInstance, chatId, user) {
+    const lang = user.language || 'uz';
+
+    const messages = {
+      uz: `Assalomu alaykum, ${user.firstName || 'Mehmon'}! 👋\n\n🍢 <b>USMON SHASHLIK</b>ga xush kelibsiz!\n\nYangi tayyorlangan shashlik va mazali taomlarni tez va qulay buyurtma qiling.\n\nQuyidagi tugmani bosib, menyuni oching:`,
+      ru: `Здравствуйте, ${user.firstName || 'Гость'}! 👋\n\n🍢 Добро пожаловать в <b>УСМОН ШАШЛЫК</b>!\n\nЗаказывайте свежеприготовленный шашлык и вкусные блюда быстро и удобно.\n\nНажмите кнопку ниже, чтобы открыть меню:`,
+    };
+
+    const buttonTexts = {
+      uz: '🍢 USMON SHASHLIK MENYUSI',
+      ru: '🍢 МЕНЮ УСМОН ШАШЛЫК',
+    };
+
+    const miniAppUrl = process.env.RENDER_EXTERNAL_URL || config.ngrokUrl || config.clientUrl;
+
+    await botInstance.sendMessage(chatId, messages[lang] || messages.uz, {
+      parse_mode: 'HTML',
+      reply_markup: {
+        inline_keyboard: [
+          [
+            {
+              text: buttonTexts[lang] || buttonTexts.uz,
+              web_app: { url: miniAppUrl },
+            },
+          ],
+        ],
+      },
+    });
+  }
+
   // ─── /start command ──────────────────────────
   bot.onText(/\/start/, async (msg) => {
     const chatId = msg.chat.id;
     const from = msg.from;
 
     try {
-      // Find or create user
       let user = await prisma.user.findUnique({
         where: { telegramId: BigInt(from.id) },
       });
@@ -44,55 +75,119 @@ function initBot() {
           },
         });
         logger.info('New user registered via bot', { telegramId: from.id, name: from.first_name });
-      } else {
-        // Update user info
-        await prisma.user.update({
-          where: { telegramId: BigInt(from.id) },
-          data: {
-            firstName: from.first_name || user.firstName,
-            lastName: from.last_name || user.lastName,
-            username: from.username || user.username,
-          },
+      }
+
+      const lang = user.language || 'uz';
+
+      if (!user.phone) {
+        botStates.set(chatId, 'AWAITING_PHONE');
+        return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте ваш номер телефона, нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib telefon raqamingizni yuboring.', {
+          reply_markup: {
+            keyboard: [[{ text: lang === 'ru' ? '📱 Отправить контакт' : '📱 Kontaktni yuborish', request_contact: true }]],
+            resize_keyboard: true,
+            one_time_keyboard: true
+          }
         });
       }
 
-      const lang = user.language || (from.language_code === 'ru' ? 'ru' : 'uz');
+      if (!user.firstName || user.firstName === 'Mehmon') {
+        botStates.set(chatId, 'AWAITING_NAME');
+        return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, введите ваше имя:' : 'Iltimos, ismingizni kiriting:');
+      }
 
-      const messages = {
-        uz: `Assalomu alaykum, ${from.first_name || 'Mehmon'}! 👋\n\n🍢 <b>USMON SHASHLIK</b>ga xush kelibsiz!\n\nYangi tayyorlangan shashlik va mazali taomlarni tez va qulay buyurtma qiling.\n\nQuyidagi tugmani bosib, menyuni oching:`,
-        ru: `Здравствуйте, ${from.first_name || 'Гость'}! 👋\n\n🍢 Добро пожаловать в <b>УСМОН ШАШЛЫК</b>!\n\nЗаказывайте свежеприготовленный шашлык и вкусные блюда быстро и удобно.\n\nНажмите кнопку ниже, чтобы открыть меню:`,
-      };
+      if (!user.latitude || !user.longitude) {
+        botStates.set(chatId, 'AWAITING_LOCATION');
+        return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте вашу локацию (адрес), нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib manzilingizni (lokatsiya) yuboring.', {
+          reply_markup: {
+            keyboard: [[{ text: lang === 'ru' ? '📍 Отправить локацию' : '📍 Lokatsiyani yuborish', request_location: true }]],
+            resize_keyboard: true,
+            one_time_keyboard: true
+          }
+        });
+      }
 
-      const buttonTexts = {
-        uz: '🍢 USMON SHASHLIK MENYUSI',
-        ru: '🍢 МЕНЮ УСМОН ШАШЛЫК',
-      };
-
-      // Production: use RENDER_EXTERNAL_URL, else ngrokUrl, else clientUrl
-      const miniAppUrl = process.env.RENDER_EXTERNAL_URL || config.ngrokUrl || config.clientUrl;
-
-      await bot.sendMessage(chatId, messages[lang] || messages.uz, {
-        parse_mode: 'HTML',
-        reply_markup: {
-          inline_keyboard: [
-            [
-              {
-                text: buttonTexts[lang] || buttonTexts.uz,
-                web_app: { url: miniAppUrl },
-              },
-            ],
-          ],
-        },
-      });
+      // If all info exists, show menu
+      sendMenu(bot, chatId, user);
     } catch (error) {
       logger.error('Bot /start error:', error);
+    }
+  });
+
+  bot.on('message', async (msg) => {
+    if (msg.text === '/start' || msg.text === '/help') return;
+
+    const chatId = msg.chat.id;
+    const state = botStates.get(chatId);
+    
+    if (!state) return;
+
+    try {
+      let user = await prisma.user.findUnique({
+        where: { telegramId: BigInt(chatId) },
+      });
+      if (!user) return;
+      const lang = user.language || 'uz';
+
+      if (state === 'AWAITING_PHONE') {
+        if (msg.contact) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { phone: msg.contact.phone_number }
+          });
+          
+          botStates.set(chatId, 'AWAITING_NAME');
+          return bot.sendMessage(chatId, lang === 'ru' ? 'Спасибо! Теперь введите ваше имя:' : 'Rahmat! Endi ismingizni kiriting:', {
+            reply_markup: { remove_keyboard: true }
+          });
+        } else {
+          return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, используйте кнопку отправки контакта.' : 'Iltimos, kontaktni yuborish tugmasidan foydalaning.');
+        }
+      }
+
+      if (state === 'AWAITING_NAME') {
+        if (msg.text) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { firstName: msg.text }
+          });
+
+          botStates.set(chatId, 'AWAITING_LOCATION');
+          return bot.sendMessage(chatId, lang === 'ru' ? 'Отлично! Теперь отправьте вашу локацию (адрес).' : 'Ajoyib! Endi manzilingizni (lokatsiya) yuboring.', {
+            reply_markup: {
+              keyboard: [[{ text: lang === 'ru' ? '📍 Отправить локацию' : '📍 Lokatsiyani yuborish', request_location: true }]],
+              resize_keyboard: true,
+              one_time_keyboard: true
+            }
+          });
+        }
+      }
+
+      if (state === 'AWAITING_LOCATION') {
+        if (msg.location) {
+          await prisma.user.update({
+            where: { id: user.id },
+            data: { latitude: msg.location.latitude, longitude: msg.location.longitude }
+          });
+          botStates.delete(chatId);
+          
+          await bot.sendMessage(chatId, lang === 'ru' ? 'Спасибо! Вы успешно зарегистрированы.' : 'Rahmat! Siz muvaffaqiyatli ro\'yxatdan o\'tdingiz.', {
+            reply_markup: { remove_keyboard: true }
+          });
+          
+          user = await prisma.user.findUnique({ where: { id: user.id } });
+          sendMenu(bot, chatId, user);
+        } else {
+          return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, используйте кнопку отправки локации.' : 'Iltimos, lokatsiyani yuborish tugmasidan foydalaning.');
+        }
+      }
+    } catch (err) {
+      logger.error('Bot message handling error:', err);
     }
   });
 
   // ─── /help command ───────────────────────────
   bot.onText(/\/help/, async (msg) => {
     const chatId = msg.chat.id;
-
     await bot.sendMessage(
       chatId,
       `🍢 <b>USMON SHASHLIK</b>\n\n📋 Buyurtma berish uchun menyuni oching.\n📞 Aloqa: +998 90 123 45 67\n\n/start - Menyuni ochish`,

@@ -52,6 +52,7 @@ export const adminAPI = {
   getOrders: (params) => api.get('/admin/orders', { params }),
   getOrder: (id) => api.get(`/admin/orders/${id}`),
   updateOrderStatus: (id, status) => api.patch(`/admin/orders/${id}`, { status }),
+  updateOrderItems: (id, data) => api.patch(`/admin/orders/${id}/items`, data),
   exportOrdersCsvUrl: () => `${API_URL}/admin/orders/export`,
 
   // Products

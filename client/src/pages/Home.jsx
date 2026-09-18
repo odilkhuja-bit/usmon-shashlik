@@ -16,7 +16,7 @@ import ProductSheet from '../components/ProductSheet';
 export default function Home() {
   const navigate = useNavigate();
   const { user, language, selectedBranch, categories, settings } = useApp();
-  const { addItem } = useCart();
+  const { items, addItem, updateQuantity, removeItem } = useCart();
   const { showToast } = useToast();
   const [stories, setStories] = useState([]);
   const [products, setProducts] = useState([]);
@@ -174,11 +174,23 @@ export default function Home() {
                         <span className="product-card-old-price">{formatPrice(product.oldPrice)}</span>
                       )}
                     </div>
-                    {product.isAvailable !== false && (
-                      <button className="product-card-add" onClick={(e) => handleQuickAdd(e, product)}>
-                        +
-                      </button>
-                    )}
+                    {product.isAvailable !== false && (() => {
+                      const cartItem = items.find(i => i.productId === product.id);
+                      if (cartItem) {
+                        return (
+                          <div className="product-qty-inline" onClick={(e) => e.stopPropagation()} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-bg-secondary)', padding: '4px', borderRadius: '20px' }}>
+                            <button onClick={() => cartItem.quantity > 1 ? updateQuantity(cartItem.productId, cartItem.quantity - 1) : removeItem(cartItem.productId)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: '#fff', border: 'none', fontWeight: 600, color: 'var(--color-text)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>-</button>
+                            <span style={{ fontSize: '14px', fontWeight: 700, minWidth: '12px', textAlign: 'center' }}>{cartItem.quantity}</span>
+                            <button onClick={() => updateQuantity(cartItem.productId, cartItem.quantity + 1)} style={{ width: '28px', height: '28px', borderRadius: '50%', background: 'var(--color-primary)', border: 'none', fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>+</button>
+                          </div>
+                        );
+                      }
+                      return (
+                        <button className="product-card-add" onClick={(e) => handleQuickAdd(e, product)}>
+                          +
+                        </button>
+                      );
+                    })()}
                   </div>
                 </div>
 

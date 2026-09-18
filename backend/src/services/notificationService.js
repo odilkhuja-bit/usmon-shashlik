@@ -85,7 +85,53 @@ async function sendStatusNotification(user, order) {
   return null;
 }
 
+/**
+ * Send full order details to Admins telegram group
+ */
+async function sendOrderToAdmins(user, order, branch) {
+  const adminChatId = process.env.ADMIN_CHAT_ID;
+  
+  if (!adminChatId) {
+    logger.warn('ADMIN_CHAT_ID is not defined in .env. Admin notification skipped.');
+    return null;
+  }
+
+  const itemsList = order.items
+    .map((item) => `  • ${item.name} × ${item.quantity}`)
+    .join('\n');
+
+  let locationText = order.address ? `\nManzil: ${order.address}` : '';
+  if (order.latitude && order.longitude) {
+    locationText += `\nXarita: https://maps.google.com/?q=${order.latitude},${order.longitude}`;
+  } else if (user.latitude && user.longitude) {
+    locationText += `\nXarita: https://maps.google.com/?q=${user.latitude},${user.longitude}`;
+  }
+
+  const deliveryType = order.deliveryType === 'YANDEX' ? '🚕 Yandex (Oldindan to\'lov talab etilishi mumkin)' : (deliveryTypeLabels[order.deliveryType]?.uz || order.deliveryType);
+
+  const text = `🚨 <b>YANGI BUYURTMA</b> 🚨\n
+📋 Buyurtma: <b>#${order.orderNumber}</b>
+📍 Filial: ${branch.name}
+🚚 Turi: ${deliveryType}
+👤 Mijoz: ${user.firstName || ''} ${user.lastName || ''}
+📞 Telefon: ${order.phone || user.phone}
+${locationText}
+
+🍢 <b>Taomlar:</b>
+${itemsList}
+
+💰 <b>Jami: ${formatPrice(order.total)} so'm</b>
+💬 Izoh: ${order.comment || 'Yo\'q'}`;
+
+  const result = await sendMessage(adminChatId, text);
+  if (result) {
+    logger.info(`Order notification sent to Admin Group`, { orderNumber: order.orderNumber });
+  }
+  return result;
+}
+
 module.exports = {
   sendOrderNotification,
   sendStatusNotification,
+  sendOrderToAdmins,
 };

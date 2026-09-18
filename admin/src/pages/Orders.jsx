@@ -22,6 +22,14 @@ const ORDER_STATUSES = [
   'CANCELLED',
 ];
 
+const getDeliveryLabel = (type, lang) => {
+  if (type === 'DELIVERY') return lang === 'ru' ? '🚚 Доставка' : '🚚 Yetkazib berish';
+  if (type === 'PICKUP') return lang === 'ru' ? '🏃 Самовывоз' : '🏃 Olib ketish';
+  if (type === 'DINE_IN') return lang === 'ru' ? '🍽 В ресторане' : '🍽 Restoranda';
+  if (type === 'YANDEX') return lang === 'ru' ? '🚕 Яндекс (Доставка)' : '🚕 Yandex (Taksi)';
+  return type || '—';
+};
+
 export default function Orders({ lang = 'uz' }) {
   const { showToast } = useToast();
   const [orders, setOrders] = useState([]);
@@ -34,6 +42,12 @@ export default function Orders({ lang = 'uz' }) {
   const [search, setSearch] = useState('');
   const [selectedOrder, setSelectedOrder] = useState(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  // For Editing Orders
+  const [allProducts, setAllProducts] = useState([]);
+  const [isEditingOrder, setIsEditingOrder] = useState(false);
+  const [editedItems, setEditedItems] = useState([]);
+  const [selectedProductId, setSelectedProductId] = useState('');
 
   const loadOrders = useCallback(async () => {
     try {
@@ -54,6 +68,9 @@ export default function Orders({ lang = 'uz' }) {
 
   useEffect(() => {
     adminAPI.getBranches().then(setBranches).catch(() => {});
+    adminAPI.getProducts({ limit: 100 }).then(res => {
+      setAllProducts(Array.isArray(res) ? res : (res.products || []));
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -93,6 +110,60 @@ export default function Orders({ lang = 'uz' }) {
       showToast(`Status o'zgartirildi: ${t(`status_${newStatus}`, lang)}`, 'success');
     } catch (err) {
       showToast(err.message || 'Statusni yangilab bo\'lmadi', 'error');
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const updateEditedItemQty = (idx, qty) => {
+    const newItems = [...editedItems];
+    if (qty <= 0) {
+      newItems.splice(idx, 1);
+    } else {
+      newItems[idx].quantity = qty;
+    }
+    setEditedItems(newItems);
+  };
+
+  const handleAddProductToOrder = () => {
+    if (!selectedProductId) return;
+    const prod = allProducts.find(p => p.id === parseInt(selectedProductId));
+    if (!prod) return;
+    
+    const newItems = [...editedItems];
+    const existingIdx = newItems.findIndex(i => i.productId === prod.id || i.id === prod.id);
+    if (existingIdx > -1) {
+      newItems[existingIdx].quantity += 1;
+    } else {
+      newItems.push({
+        productId: prod.id,
+        name: prod.nameUz,
+        nameUz: prod.nameUz,
+        nameRu: prod.nameRu,
+        price: prod.price,
+        quantity: 1,
+      });
+    }
+    setEditedItems(newItems);
+    setSelectedProductId('');
+  };
+
+  const handleEditOrder = () => {
+    setIsEditingOrder(true);
+    setEditedItems(JSON.parse(JSON.stringify(selectedOrder.items || [])));
+  };
+
+  const handleSaveItems = async () => {
+    try {
+      setIsUpdating(true);
+      const res = await adminAPI.updateOrderItems(selectedOrder.id, { items: editedItems });
+      
+      setOrders((prev) => prev.map((o) => (o.id === res.id ? res : o)));
+      setSelectedOrder(res);
+      setIsEditingOrder(false);
+      showToast('Buyurtma muvaffaqiyatli tahrirlandi', 'success');
+    } catch (err) {
+      showToast(err.message || 'Xatolik yuz berdi', 'error');
     } finally {
       setIsUpdating(false);
     }
@@ -208,7 +279,7 @@ export default function Orders({ lang = 'uz' }) {
                     <td>{order.branch?.name || 'Asosiy'}</td>
                     <td>
                       <span style={{ textTransform: 'capitalize' }}>
-                        {order.deliveryType?.toLowerCase()}
+                        {getDeliveryLabel(order.deliveryType, lang)}
                       </span>
                     </td>
                     <td style={{ fontWeight: 700, color: '#e85d04' }}>
@@ -300,7 +371,35 @@ export default function Orders({ lang = 'uz' }) {
             </div>
 
             {/* Order Items */}
-            <h4 style={{ fontSize: '14px', fontWeight: 700, marginBottom: '10px' }}>Taomlar ro'yxati</h4>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <h4 style={{ fontSize: '14px', fontWeight: 700 }}>Taomlar ro'yxati</h4>
+              {!isEditingOrder ? (
+                <button className="btn btn-secondary btn-sm" onClick={handleEditOrder}>✏️ Tahrirlash</button>
+              ) : (
+                <div>
+                  <button className="btn btn-secondary btn-sm" onClick={() => setIsEditingOrder(false)} style={{ marginRight: '8px' }}>Bekor qilish</button>
+                  <button className="btn btn-primary btn-sm" onClick={handleSaveItems} disabled={isUpdating}>💾 Saqlash</button>
+                </div>
+              )}
+            </div>
+            
+            {isEditingOrder && (
+              <div style={{ display: 'flex', gap: '8px', marginBottom: '15px' }}>
+                <select 
+                  className="filter-select" 
+                  style={{ flex: 1 }}
+                  value={selectedProductId}
+                  onChange={(e) => setSelectedProductId(e.target.value)}
+                >
+                  <option value="">+ Yangi taom qo'shish...</option>
+                  {allProducts.map(p => (
+                    <option key={p.id} value={p.id}>{p.nameUz} - {formatPrice(p.price)}</option>
+                  ))}
+                </select>
+                <button className="btn btn-primary btn-sm" onClick={handleAddProductToOrder}>Qo'shish</button>
+              </div>
+            )}
+
             <div className="table-container" style={{ marginBottom: '20px' }}>
               <table className="data-table">
                 <thead>
@@ -309,15 +408,31 @@ export default function Orders({ lang = 'uz' }) {
                     <th>Narxi</th>
                     <th>Soni</th>
                     <th>Jami</th>
+                    {isEditingOrder && <th>Amal</th>}
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedOrder.items?.map((item, idx) => (
+                  {(isEditingOrder ? editedItems : selectedOrder.items)?.map((item, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 600 }}>{item.name || item.nameUz}</td>
                       <td>{formatPrice(item.price)}</td>
-                      <td>x {item.quantity}</td>
+                      <td>
+                        {!isEditingOrder ? (
+                          `x ${item.quantity}`
+                        ) : (
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <button className="btn btn-secondary btn-sm" style={{ padding: '2px 8px' }} onClick={() => updateEditedItemQty(idx, item.quantity - 1)}>-</button>
+                            <span>{item.quantity}</span>
+                            <button className="btn btn-secondary btn-sm" style={{ padding: '2px 8px' }} onClick={() => updateEditedItemQty(idx, item.quantity + 1)}>+</button>
+                          </div>
+                        )}
+                      </td>
                       <td style={{ fontWeight: 700 }}>{formatPrice(item.price * item.quantity)}</td>
+                      {isEditingOrder && (
+                        <td>
+                          <button className="btn btn-danger btn-sm" onClick={() => updateEditedItemQty(idx, 0)}>✕</button>
+                        </td>
+                      )}
                     </tr>
                   ))}
                 </tbody>

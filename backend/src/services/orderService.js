@@ -4,7 +4,7 @@
 
 const { PrismaClient } = require('@prisma/client');
 const { generateOrderNumber } = require('../utils/helpers');
-const { sendOrderNotification, sendStatusNotification } = require('./notificationService');
+const { sendOrderNotification, sendStatusNotification, sendOrderToAdmins } = require('./notificationService');
 const logger = require('../utils/logger');
 
 const prisma = new PrismaClient();
@@ -95,6 +95,7 @@ async function createOrder(userId, orderData, io) {
   // Send Telegram notification to user
   try {
     await sendOrderNotification(order.user, order, order.branch);
+    await sendOrderToAdmins(order.user, order, order.branch);
   } catch (err) {
     logger.error('Failed to send order notification:', err.message);
   }

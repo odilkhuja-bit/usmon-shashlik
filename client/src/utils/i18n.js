@@ -207,7 +207,7 @@ export function t(key, lang = 'uz') {
 }
 
 export function getProductName(product, lang) {
-  return lang === 'ru' ? (product.nameRu || product.nameUz) : product.nameUz;
+  return lang === 'ru' ? (product.nameRu || product.nameUz || product.name) : (product.nameUz || product.name);
 }
 
 export function getProductDesc(product, lang) {

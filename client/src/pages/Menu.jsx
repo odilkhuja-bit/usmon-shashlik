@@ -139,9 +139,9 @@ export default function Menu() {
                       const cartItem = items.find(i => i.productId === product.id);
                       if (cartItem) {
                         return (
-                          <div className="qty-selector" onClick={(e) => e.stopPropagation()} style={{ transform: 'scale(0.8)', margin: '-5px -10px' }}>
+                          <div className="qty-selector" onClick={(e) => e.stopPropagation()}>
                             <button className="qty-btn" onClick={() => { updateQuantity(product.id, cartItem.quantity - 1); haptic('light'); }}>−</button>
-                            <span className="qty-value">{cartItem.quantity}</span>
+                            <span className="qty-value" style={{ color: 'var(--color-text)' }}>{cartItem.quantity}</span>
                             <button className="qty-btn" onClick={() => { updateQuantity(product.id, cartItem.quantity + 1); haptic('light'); }}>+</button>
                           </div>
                         );

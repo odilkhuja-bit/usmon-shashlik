@@ -159,14 +159,7 @@ export default function Orders() {
                       ))}
                     </div>
 
-                    <button
-                      className="btn btn-secondary btn-sm"
-                      style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
-                      onClick={() => handleReorder(order)}
-                    >
-                      <span>🔄</span>
-                      <span>{t('reorder', language)}</span>
-                    </button>
+
                   </div>
                 )}
               </div>

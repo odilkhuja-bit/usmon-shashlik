@@ -103,7 +103,7 @@ function initBot() {
 
       if (!user.latitude || !user.longitude) {
         botStates.set(chatId, 'AWAITING_LOCATION');
-        return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте вашу локацию (адрес), нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib manzilingizni (lokatsiya) yuboring.', {
+        return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте вашу локацию (адрес), нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib yoki aniq manzilingizni (lokatsiya) yuboring.', {
           reply_markup: {
             keyboard: [[{ text: lang === 'ru' ? '📍 Отправить локацию' : '📍 Lokatsiyani yuborish', request_location: true }]],
             resize_keyboard: true,
@@ -216,7 +216,7 @@ function initBot() {
         const lang = user.language || 'uz';
         
         botStates.set(chatId, 'AWAITING_LOCATION');
-        await bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте вашу новую локацию (адрес), нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib yangi manzilingizni (lokatsiya) yuboring.', {
+        await bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте вашу новую локацию (адрес), нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib yoki aniq manzilingizni (lokatsiya) yuboring.', {
           reply_markup: {
             keyboard: [[{ text: lang === 'ru' ? '📍 Отправить локацию' : '📍 Lokatsiyani yuborish', request_location: true }]],
             resize_keyboard: true,

@@ -113,8 +113,22 @@ function initBot() {
     }
   });
 
+  // ─── /clearall command (DANGER ZONE) ──────────────
+  bot.onText(/\/clearall/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      await prisma.order.deleteMany({});
+      await prisma.user.deleteMany({});
+      botStates.clear();
+      bot.sendMessage(chatId, "⚠️ Barcha ma'lumotlar (buyurtmalar va mijozlar) muvaffaqiyatli O'CHIRILDI.\n\nEndi botni qayta boshlash uchun /start bosing.");
+    } catch (e) {
+      logger.error('Error in /clearall:', e);
+      bot.sendMessage(chatId, "Xatolik yuz berdi: " + e.message);
+    }
+  });
+
   bot.on('message', async (msg) => {
-    if (msg.text === '/start' || msg.text === '/help') return;
+    if (msg.text === '/start' || msg.text === '/help' || msg.text === '/clearall') return;
 
     const chatId = msg.chat.id;
     const state = botStates.get(chatId);

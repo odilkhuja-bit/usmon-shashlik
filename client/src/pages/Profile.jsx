@@ -8,16 +8,22 @@ import { t, getBranchName } from '../utils/i18n';
 
 export default function Profile() {
   const navigate = useNavigate();
-  const { user, language, setLanguage, selectedBranch, settings } = useApp();
+  const { user, language, setLanguage, selectedBranch, settings, branches = [] } = useApp();
 
   const firstName = user?.firstName || (language === 'ru' ? 'Гость' : 'Mehmon');
   const initial = firstName.charAt(0).toUpperCase();
+
+  const branchContactItems = branches.filter(b => b.phone).map(b => ({
+    icon: '📞',
+    text: `${b.name || (language === 'ru' ? b.nameRu : '')} (${b.phone})`,
+    action: () => window.open(`tel:${b.phone.replace(/\s+/g, '')}`)
+  }));
 
   const menuItems = [
     { icon: '📜', text: t('order_history', language), action: () => navigate('/orders') },
     { icon: '❤️', text: t('favorites', language), action: () => navigate('/favorites') },
     { icon: '📍', text: t('change_branch_menu', language), action: () => navigate('/branch-select') },
-    { icon: '📞', text: t('contact', language), action: () => window.open(`tel:${settings.restaurant_phone || ''}`) },
+    ...branchContactItems,
     { icon: 'ℹ️', text: t('about', language), action: () => {} },
   ];
 

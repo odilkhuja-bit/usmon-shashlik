@@ -49,6 +49,12 @@ function initBot() {
               web_app: { url: miniAppUrl },
             },
           ],
+          [
+            {
+              text: lang === 'ru' ? '📍 Изменить локацию' : "📍 Lokatsiyani o'zgartirish",
+              callback_data: 'change_location',
+            }
+          ]
         ],
       },
     });
@@ -196,6 +202,31 @@ function initBot() {
       }
     } catch (err) {
       logger.error('Bot message handling error:', err);
+    }
+  });
+  // ─── Callback Queries ────────────────────────
+  bot.on('callback_query', async (query) => {
+    const chatId = query.message.chat.id;
+    const data = query.data;
+
+    try {
+      if (data === 'change_location') {
+        const user = await prisma.user.findUnique({ where: { telegramId: BigInt(chatId) } });
+        if (!user) return;
+        const lang = user.language || 'uz';
+        
+        botStates.set(chatId, 'AWAITING_LOCATION');
+        await bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, отправьте вашу новую локацию (адрес), нажав на кнопку ниже.' : 'Iltimos, pastdagi tugmani bosib yangi manzilingizni (lokatsiya) yuboring.', {
+          reply_markup: {
+            keyboard: [[{ text: lang === 'ru' ? '📍 Отправить локацию' : '📍 Lokatsiyani yuborish', request_location: true }]],
+            resize_keyboard: true,
+            one_time_keyboard: true
+          }
+        });
+        await bot.answerCallbackQuery(query.id);
+      }
+    } catch (error) {
+      logger.error('Callback query error:', error);
     }
   });
 

@@ -73,7 +73,15 @@ export default function Checkout() {
 
   return (
     <div className="page" style={{ paddingTop: '16px', paddingBottom: '100px' }}>
-      <h1 className="page-title">{t('checkout_title', language)}</h1>
+      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '16px' }}>
+        <button 
+          onClick={() => navigate(-1)} 
+          style={{ background: 'none', border: 'none', fontSize: '24px', cursor: 'pointer', padding: '0 12px 0 0', color: 'var(--color-primary)' }}
+        >
+          ←
+        </button>
+        <h1 className="page-title" style={{ marginBottom: 0 }}>{t('checkout_title', language)}</h1>
+      </div>
 
       {/* Name */}
       <div className="input-group">

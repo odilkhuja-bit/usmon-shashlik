@@ -38,16 +38,7 @@ async function main() {
   // ─── 2. Branches ─────────────────────────────
   const branch1 = await prisma.branch.upsert({
     where: { id: 1 },
-    update: {
-      name: 'USMON SHASHLIK — Izza',
-      nameRu: 'УСМОН ШАШЛЫК — Изза',
-      address: 'Izza',
-      addressRu: 'Изза',
-      phone: '+998 70 028 83 83',
-      latitude: 41.314775,
-      longitude: 69.153575,
-      workingHours: '09:00-23:00',
-    },
+    update: {},
     create: {
       name: 'USMON SHASHLIK — Izza',
       nameRu: 'УСМОН ШАШЛЫК — Изза',
@@ -63,13 +54,7 @@ async function main() {
 
   const branch2 = await prisma.branch.upsert({
     where: { id: 2 },
-    update: {
-      address: '989G+FMH, Toshkent, Toshkent Viloyati',
-      addressRu: '989G+FMH, Ташкент, Ташкентская область',
-      phone: '+998 70 029 93 93',
-      latitude: 41.368556,
-      longitude: 69.326587,
-    },
+    update: {},
     create: {
       name: 'USMON SHASHLIK — Yunusobod',
       nameRu: 'УСМОН ШАШЛЫК — Юнусабад',

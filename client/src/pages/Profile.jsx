@@ -24,7 +24,7 @@ export default function Profile() {
     { icon: '❤️', text: t('favorites', language), action: () => navigate('/favorites') },
     { icon: '📍', text: t('change_branch_menu', language), action: () => navigate('/branch-select') },
     ...branchContactItems,
-    { icon: 'ℹ️', text: t('about', language), action: () => {} },
+    { icon: 'ℹ️', text: t('about', language), action: () => window.open('https://www.instagram.com/usmon_shashlik?utm_source=ig_web_button_share_sheet&stkn=ZDNlZDc0MzIxNw==', '_blank') },
   ];
 
   return (

@@ -100,11 +100,16 @@ async function sendOrderToAdmins(user, order, branch) {
     .map((item) => `  • ${item.name} × ${item.quantity}`)
     .join('\n');
 
-  let locationText = order.address ? `\nManzil: ${order.address}` : '';
-  if (order.latitude && order.longitude) {
-    locationText += `\nXarita: https://maps.google.com/?q=${order.latitude},${order.longitude}`;
-  } else if (user.latitude && user.longitude) {
-    locationText += `\nXarita: https://maps.google.com/?q=${user.latitude},${user.longitude}`;
+  let locationText = '';
+  if (order.deliveryType === 'DELIVERY' || order.deliveryType === 'YANDEX') {
+    if (order.address) {
+      locationText += `\nManzil: ${order.address}`;
+    }
+    if (order.latitude && order.longitude) {
+      locationText += `\nXarita: https://maps.google.com/?q=${order.latitude},${order.longitude}`;
+    } else if (user.latitude && user.longitude) {
+      locationText += `\nXarita: https://maps.google.com/?q=${user.latitude},${user.longitude}`;
+    }
   }
 
   const deliveryType = order.deliveryType === 'YANDEX' ? '🚕 Yandex (Oldindan to\'lov talab etilishi mumkin)' : (deliveryTypeLabels[order.deliveryType]?.uz || order.deliveryType);

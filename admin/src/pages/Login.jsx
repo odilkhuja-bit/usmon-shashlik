@@ -12,8 +12,8 @@ export default function Login() {
   const { login } = useAuth();
   const { showToast } = useToast();
 
-  const [username, setUsername] = useState('admin');
-  const [password, setPassword] = useState('admin123');
+  const [username, setUsername] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
@@ -79,9 +79,6 @@ export default function Login() {
             {loading ? 'Kirilmoqda...' : 'Tizimga kirish →'}
           </button>
 
-          <div style={{ textAlign: 'center', marginTop: '20px', fontSize: '12px', color: '#94a3b8' }}>
-            Standart login: <code>admin</code> / parol: <code>admin123</code>
-          </div>
         </form>
       </div>
     </div>

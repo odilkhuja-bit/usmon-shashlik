@@ -52,13 +52,7 @@ export default function ProductSheet({ product, onClose }) {
         <div className="sheet-body">
           <h2 className="sheet-name">{name}</h2>
 
-          {desc && <p className="sheet-desc">{desc}</p>}
 
-          {ingredients && (
-            <p className="sheet-ingredients">
-              {t('ingredients', language)}: {ingredients}
-            </p>
-          )}
 
           <div className="sheet-price-row">
             <span className="sheet-price">{formatPrice(product.price)} so'm</span>

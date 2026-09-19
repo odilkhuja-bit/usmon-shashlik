@@ -90,7 +90,7 @@ async function getProducts(req, res, next) {
   try {
     const { categoryId, search } = req.query;
 
-    const where = { isDeleted: false };
+    const where = { isDeleted: false, isAvailable: true };
     if (categoryId) where.categoryId = parseInt(categoryId);
     if (search) {
       where.OR = [
@@ -151,10 +151,20 @@ async function getBranches(req, res, next) {
  */
 async function getStories(req, res, next) {
   try {
-    const stories = await prisma.story.findMany({
-      where: { isActive: true },
+    const popularProducts = await prisma.product.findMany({
+      where: { isUpsell: true, isAvailable: true, isDeleted: false },
       orderBy: { sortOrder: 'asc' },
     });
+
+    const stories = popularProducts.map(p => ({
+      id: p.id,
+      title: p.nameUz,
+      titleRu: p.nameRu,
+      imageUrl: p.imageUrl || '',
+      bgColor: '#E85D04',
+      isProduct: true,
+      originalProduct: p
+    }));
 
     res.json(stories);
   } catch (error) {

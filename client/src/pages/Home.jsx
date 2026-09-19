@@ -84,11 +84,11 @@ export default function Home() {
       {stories.length > 0 && (
         <div className="stories-container">
           {stories.map((story) => (
-            <div key={story.id} className="story-item" onClick={() => setStoryViewer(story)}>
+            <div key={story.id} className="story-item" onClick={() => story.isProduct ? setSelectedProduct(story.originalProduct) : setStoryViewer(story)}>
               <div className="story-ring" style={{ background: `linear-gradient(135deg, ${story.bgColor || '#E85D04'}, #F48C06)` }}>
                 <img src={story.imageUrl} alt={story.title} onError={(e) => { e.target.style.display = 'none'; }} />
               </div>
-              <div className="story-title">{story.title}</div>
+              <div className="story-title">{language === 'ru' ? (story.titleRu || story.title) : story.title}</div>
             </div>
           ))}
         </div>

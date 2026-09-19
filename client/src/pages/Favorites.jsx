@@ -117,7 +117,7 @@ export default function Favorites() {
               </div>
               <div className="product-card-body">
                 <h3 className="product-card-title">{getProductName(product, language)}</h3>
-                <p className="product-card-desc">{getProductDesc(product, language)}</p>
+
                 <div className="product-card-footer">
                   <span className="product-card-price">{formatPrice(product.price)}</span>
                   <button

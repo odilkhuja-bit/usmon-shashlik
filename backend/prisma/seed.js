@@ -324,7 +324,7 @@ async function main() {
   ];
 
   for (const product of products) {
-    await prisma.product.create({ data: product });
+    await prisma.product.create({ data: { ...product, isAvailable: false } });
   }
   console.log(`  ✅ ${products.length} products created`);
 

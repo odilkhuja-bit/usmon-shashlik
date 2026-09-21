@@ -133,8 +133,20 @@ function initBot() {
     }
   });
 
+  // ─── /deactivateall command ──────────────
+  bot.onText(/\/deactivateall/, async (msg) => {
+    const chatId = msg.chat.id;
+    try {
+      await prisma.product.updateMany({ data: { isAvailable: false } });
+      bot.sendMessage(chatId, "✅ Barcha taomlar muvaffaqiyatli nofaol qilindi (botda ko'rinmaydi). Endi Admin Paneldan xohlaganlaringizni bittalab yoqishingiz mumkin.");
+    } catch (e) {
+      logger.error('Error in /deactivateall:', e);
+      bot.sendMessage(chatId, "Xatolik yuz berdi: " + e.message);
+    }
+  });
+
   bot.on('message', async (msg) => {
-    if (msg.text === '/start' || msg.text === '/help' || msg.text === '/clearall') return;
+    if (msg.text === '/start' || msg.text === '/help' || msg.text === '/clearall' || msg.text === '/deactivateall') return;
 
     const chatId = msg.chat.id;
     const state = botStates.get(chatId);

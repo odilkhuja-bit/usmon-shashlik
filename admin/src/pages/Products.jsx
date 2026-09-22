@@ -21,7 +21,7 @@ export default function Products({ lang = 'uz' }) {
   // Filters
   const [search, setSearch] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
-  const [includeDeleted, setIncludeDeleted] = useState(false);
+  const [showUnavailable, setShowUnavailable] = useState(false);
 
   // Modal form state
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -46,7 +46,8 @@ export default function Products({ lang = 'uz' }) {
         adminAPI.getProducts({
           search,
           categoryId: categoryFilter,
-          showDeleted: includeDeleted ? 'true' : 'false',
+          showDeleted: 'false',
+          showUnavailable: showUnavailable ? 'true' : 'false',
         }),
         adminAPI.getCategories(),
       ]);
@@ -58,7 +59,7 @@ export default function Products({ lang = 'uz' }) {
     } finally {
       setLoading(false);
     }
-  }, [search, categoryFilter, includeDeleted, showToast]);
+  }, [search, categoryFilter, showUnavailable, showToast]);
 
   useEffect(() => {
     loadData();
@@ -202,10 +203,10 @@ export default function Products({ lang = 'uz' }) {
           <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
             <input
               type="checkbox"
-              checked={includeDeleted}
-              onChange={(e) => setIncludeDeleted(e.target.checked)}
+              checked={showUnavailable}
+              onChange={(e) => setShowUnavailable(e.target.checked)}
             />
-            Faqat o'chirilganlarni ko'rsatish
+            Faqat tugagan maxsulotlarni ko'rsatish
           </label>
         </div>
       </div>

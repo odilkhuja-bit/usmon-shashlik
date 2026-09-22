@@ -12,7 +12,7 @@ const prisma = new PrismaClient();
  */
 async function getAll(req, res, next) {
   try {
-    const { categoryId, search, showDeleted } = req.query;
+    const { categoryId, search, showDeleted, showUnavailable } = req.query;
 
     const where = {};
     if (showDeleted === 'true') {
@@ -21,6 +21,12 @@ async function getAll(req, res, next) {
       // Show all
     } else {
       where.isDeleted = false;
+    }
+
+    if (showUnavailable === 'true') {
+      where.isAvailable = false;
+    } else if (showUnavailable === 'false') {
+      where.isAvailable = true;
     }
 
     if (categoryId) where.categoryId = parseInt(categoryId);

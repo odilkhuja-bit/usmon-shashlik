@@ -46,7 +46,7 @@ export default function Products({ lang = 'uz' }) {
         adminAPI.getProducts({
           search,
           categoryId: categoryFilter,
-          showDeleted: includeDeleted ? 'all' : 'false',
+          showDeleted: includeDeleted ? 'true' : 'false',
         }),
         adminAPI.getCategories(),
       ]);
@@ -205,7 +205,7 @@ export default function Products({ lang = 'uz' }) {
               checked={includeDeleted}
               onChange={(e) => setIncludeDeleted(e.target.checked)}
             />
-            O'chirilganlarni ko'rsatish
+            Faqat o'chirilganlarni ko'rsatish
           </label>
         </div>
       </div>

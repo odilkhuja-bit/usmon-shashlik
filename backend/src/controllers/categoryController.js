@@ -28,7 +28,12 @@ async function getAll(req, res, next) {
  */
 async function create(req, res, next) {
   try {
-    const { nameUz, nameRu, slug, icon, sortOrder } = req.body;
+    const { nameUz, nameRu, icon, sortOrder } = req.body;
+    let { slug } = req.body;
+
+    if (!slug && nameUz) {
+      slug = nameUz.toLowerCase().replace(/o'/g, 'o').replace(/g'/g, 'g').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)+/g, '');
+    }
 
     if (!nameUz || !nameRu || !slug) {
       return res.status(400).json({ error: 'nameUz, nameRu, and slug are required' });

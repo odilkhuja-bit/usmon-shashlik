@@ -44,8 +44,21 @@ export default function Users({ lang = 'uz' }) {
     }
   };
 
-  const handleExportCsv = () => {
-    window.open(adminAPI.exportUsersCsvUrl(), '_blank');
+  const handleExportCsv = async () => {
+    try {
+      showToast('Eksport qilinmoqda, kuting...', 'success');
+      const blob = await adminAPI.exportUsersCsv({ search });
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `mijozlar_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast(err.message || 'Eksport qilishda xatolik', 'error');
+    }
   };
 
   return (

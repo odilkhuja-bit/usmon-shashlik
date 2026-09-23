@@ -54,6 +54,7 @@ export const adminAPI = {
   updateOrderStatus: (id, status) => api.patch(`/admin/orders/${id}`, { status }),
   updateOrderItems: (id, data) => api.patch(`/admin/orders/${id}/items`, data),
   exportOrdersCsvUrl: () => `${API_URL}/admin/orders/export`,
+  exportOrdersCsv: (params) => api.get('/admin/orders/export', { params, responseType: 'blob' }),
 
   // Products
   getProducts: (params) => api.get('/admin/products', { params }),
@@ -82,6 +83,7 @@ export const adminAPI = {
   getUser: (id) => api.get(`/admin/users/${id}`),
   toggleUserBlock: (id) => api.patch(`/admin/users/${id}/block`),
   exportUsersCsvUrl: () => `${API_URL}/admin/users/export`,
+  exportUsersCsv: (params) => api.get('/admin/users/export', { params, responseType: 'blob' }),
 
   // Broadcast
   getBroadcastHistory: (params) => api.get('/admin/broadcast', { params }),

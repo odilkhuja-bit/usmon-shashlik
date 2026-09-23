@@ -169,8 +169,27 @@ export default function Orders({ lang = 'uz' }) {
     }
   };
 
-  const handleExportCsv = () => {
-    window.open(adminAPI.exportOrdersCsvUrl(), '_blank');
+  const handleExportCsv = async () => {
+    try {
+      showToast('Eksport qilinmoqda, kuting...', 'success');
+      
+      const params = {};
+      if (statusFilter !== 'ALL') params.status = statusFilter;
+      if (branchFilter) params.branchId = branchFilter;
+      if (search) params.search = search;
+      
+      const blob = await adminAPI.exportOrdersCsv(params);
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `orders_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      showToast(err.message || 'Eksport qilishda xatolik', 'error');
+    }
   };
 
   return (

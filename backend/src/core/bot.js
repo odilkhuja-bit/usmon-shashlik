@@ -25,39 +25,51 @@ function initBot() {
   const botStates = new Map(); // chatId -> state name
 
   async function sendMenu(botInstance, chatId, user) {
-    const lang = user.language || 'uz';
+    try {
+      const lang = user.language || 'uz';
 
-    const messages = {
-      uz: `Assalomu alaykum, ${user.firstName || 'Mehmon'}! 👋\n\n🍢 <b>USMON SHASHLIK</b>ga xush kelibsiz!\n\nYangi tayyorlangan shashlik va mazali taomlarni tez va qulay buyurtma qiling.\n\nQuyidagi tugmani bosib, menyuni oching:`,
-      ru: `Здравствуйте, ${user.firstName || 'Гость'}! 👋\n\n🍢 Добро пожаловать в <b>УСМОН ШАШЛЫК</b>!\n\nЗаказывайте свежеприготовленный шашлык и вкусные блюда быстро и удобно.\n\nНажмите кнопку ниже, чтобы открыть меню:`,
-    };
+      const messages = {
+        uz: `Assalomu alaykum, ${user.firstName || 'Mehmon'}! 👋\n\n🍢 <b>USMON SHASHLIK</b>ga xush kelibsiz!\n\nYangi tayyorlangan shashlik va mazali taomlarni tez va qulay buyurtma qiling.\n\nQuyidagi tugmani bosib, menyuni oching:`,
+        ru: `Здравствуйте, ${user.firstName || 'Гость'}! 👋\n\n🍢 Добро пожаловать в <b>УСМОН ШАШЛЫК</b>!\n\nЗаказывайте свежеприготовленный шашлык и вкусные блюда быстро и удобно.\n\nНажмите кнопку ниже, чтобы открыть меню:`,
+      };
 
-    const buttonTexts = {
-      uz: '🍢 USMON SHASHLIK MENYUSI',
-      ru: '🍢 МЕНЮ УСМОН ШАШЛЫК',
-    };
+      const buttonTexts = {
+        uz: '🍢 USMON SHASHLIK MENYUSI',
+        ru: '🍢 МЕНЮ УСМОН ШАШЛЫК',
+      };
 
-    const miniAppUrl = process.env.RENDER_EXTERNAL_URL || config.ngrokUrl || config.clientUrl;
+      let miniAppUrl = process.env.RENDER_EXTERNAL_URL ||
+        (config.clientUrl && config.clientUrl.startsWith('https://') ? config.clientUrl : null) ||
+        config.ngrokUrl ||
+        'https://usmon-shashlik.onrender.com';
 
-    await botInstance.sendMessage(chatId, messages[lang] || messages.uz, {
-      parse_mode: 'HTML',
-      reply_markup: {
-        inline_keyboard: [
-          [
-            {
-              text: buttonTexts[lang] || buttonTexts.uz,
-              web_app: { url: miniAppUrl },
-            },
+      if (!miniAppUrl.startsWith('http://') && !miniAppUrl.startsWith('https://')) {
+        miniAppUrl = 'https://' + miniAppUrl;
+      }
+
+      const isHttps = miniAppUrl.startsWith('https://');
+
+      const menuButton = isHttps
+        ? { text: buttonTexts[lang] || buttonTexts.uz, web_app: { url: miniAppUrl } }
+        : { text: buttonTexts[lang] || buttonTexts.uz, url: miniAppUrl };
+
+      await botInstance.sendMessage(chatId, messages[lang] || messages.uz, {
+        parse_mode: 'HTML',
+        reply_markup: {
+          inline_keyboard: [
+            [menuButton],
+            [
+              {
+                text: lang === 'ru' ? '📍 Изменить локацию' : "📍 Lokatsiyani o'zgartirish",
+                callback_data: 'change_location',
+              }
+            ]
           ],
-          [
-            {
-              text: lang === 'ru' ? '📍 Изменить локацию' : "📍 Lokatsiyani o'zgartirish",
-              callback_data: 'change_location',
-            }
-          ]
-        ],
-      },
-    });
+        },
+      });
+    } catch (error) {
+      logger.error('Error sending menu:', error.message || error);
+    }
   }
 
   // ─── /start command ──────────────────────────
@@ -113,7 +125,7 @@ function initBot() {
       }
 
       // If all info exists, show menu
-      sendMenu(bot, chatId, user);
+      await sendMenu(bot, chatId, user);
     } catch (error) {
       logger.error('Bot /start error:', error);
     }
@@ -207,7 +219,7 @@ function initBot() {
           });
           
           user = await prisma.user.findUnique({ where: { id: user.id } });
-          sendMenu(bot, chatId, user);
+          await sendMenu(bot, chatId, user);
         } else {
           return bot.sendMessage(chatId, lang === 'ru' ? 'Пожалуйста, используйте кнопку отправки локации.' : 'Iltimos, lokatsiyani yuborish tugmasidan foydalaning.');
         }

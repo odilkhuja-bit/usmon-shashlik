@@ -19,7 +19,7 @@ services:
       - key: NODE_ENV
         value: production
       - key: TELEGRAM_BOT_TOKEN
-        value: 8832100007:AAHjZpn6CKLPgPHPnzUAnRsJR9rqRpTjz8g
+        value: 8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0
       - key: JWT_SECRET
         generateValue: true
       - key: ADMIN_USERNAME

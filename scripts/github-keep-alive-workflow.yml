@@ -1,0 +1,25 @@
+# GitHub Actions orqali Render'ni 24/7 uyg'oq saqlash workflow fayli
+# Agar GitHub veb-saytidan Actions bo'limiga workflow qo'shmoqchi bo'lsangiz, ushbu koddan foydalanishingiz mumkin:
+name: Render 24/7 Keep-Alive Pinger
+
+on:
+  schedule:
+    # Har 10 daqiqada (Render 15 daqiqa harakatsizlikdan so'ng uxlaydi)
+    - cron: '*/10 * * * *'
+  workflow_dispatch:
+
+jobs:
+  ping:
+    name: Ping Render Health Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Render Backend
+        run: |
+          echo "Sending keep-alive ping to Render..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" "https://usmon-shashlik.onrender.com/api/health")
+          echo "Render response HTTP status: $STATUS"
+          if [ "$STATUS" -eq 200 ]; then
+            echo "✅ Render is active and awake!"
+          else
+            echo "⚠️ Render status: $STATUS"
+          fi

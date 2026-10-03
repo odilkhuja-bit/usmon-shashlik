@@ -135,6 +135,32 @@ server.listen(PORT, () => {
 
   // Initialize Telegram Bot
   initBot();
+
+  // Keep-alive pinger for Render hosting (prevents free tier sleep)
+  if (process.env.RENDER || isProduction) {
+    const https = require('https');
+    const pingUrl = process.env.RENDER_EXTERNAL_URL || 'https://usmon-shashlik.onrender.com';
+    
+    // Initial ping after 30 seconds, then every 10 minutes
+    setTimeout(() => {
+      setInterval(() => {
+        https.get(`${pingUrl}/api/health`, (res) => {
+          logger.info(`Keep-alive ping sent to ${pingUrl}/api/health [${res.statusCode}]`);
+        }).on('error', (err) => {
+          logger.warn(`Keep-alive ping error: ${err.message}`);
+        });
+      }, 10 * 60 * 1000);
+    }, 30000);
+  }
+});
+
+// ─── Process Error Handling ─────────────────
+process.on('unhandledRejection', (reason) => {
+  logger.error('Unhandled Promise Rejection:', { reason: reason?.message || reason });
+});
+
+process.on('uncaughtException', (err) => {
+  logger.error('Uncaught Exception:', { error: err?.message || err, stack: err?.stack });
 });
 
 module.exports = { app, server, io };

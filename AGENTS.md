@@ -16,9 +16,8 @@ Ushbu hujjat AI agentlari (Antigravity va boshqalar) va dasturchilar uchun loyih
 ---
 
 ## 🔑 Telegram Bot Tokeni haqida MUHIM MA'LUMOT
-* ✅ **Haqiqiy faol token:** `8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0` (Telegram API `getMe` da `200 OK`).
-* ❌ **Eski / Yaroqsiz token:** `8832100007:AAHjZpn6CKLPgPHPnzUAnRsJR9rqRpTjz8g` (Telegram API da `401 Unauthorized`).
-* **OGOHLANTIRISH:** Hech qachon `render.yaml` yoki `backend/.env` ga `AAHj...` tokenini qaytarmang!
+* ✅ **Haqiqiy faol token:** `8832100007:AAH7tiws8D...` (`backend/.env` va Render Dashboard'da saqlanadi).
+* ⚠️ **XAVFSIZLIK QOIDASI:** Tokenni hech qachon ochiq holda GitHub repozitoriyasiga yoki `render.yaml` ga yozmang! Telegram GitHub'ni avtomatik skanerlab, ochiq chiqqan tokenlarni darhol bloklaydi va hisobni xavfsizlik tekshiruviga tushiradi! `render.yaml` da faqat `sync: false` bo'lishi shart!
 
 ---
 
@@ -48,8 +47,8 @@ Ushbu hujjat AI agentlari (Antigravity va boshqalar) va dasturchilar uchun loyih
 ## 🛠️ Tezkor diagnostika buyruqlari
 
 ```bash
-# 1. Telegram bot holatini tekshirish
-curl -i "https://api.telegram.org/bot8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0/getMe"
+# 1. Telegram bot holatini tekshirish (tokeningizni qo'yib tekshiring)
+# curl -i "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getMe"
 
 # 2. Render serverining salomatligini tekshirish
 curl -i "https://usmon-shashlik.onrender.com/api/health"

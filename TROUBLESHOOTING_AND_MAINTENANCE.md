@@ -21,22 +21,17 @@ Tizim to'liq tahlil qilinganda muammoning 4 ta asosiy ildizi aniqlandi:
 * **Natija:** Telegram Bot Node.js ichida ishlagani uchun server bilan birga o'chib qolgan. Telegram orqali yuborilgan xabarlar Render'ni uyg'ota olmagan.
 * **Uyg'onish sharti:** Faqat kimdir brauzerdan `https://usmon-shashlik.onrender.com/admin/orders` ga kirgandagina Render 50 soniyada arang uyg'ongan.
 
-### 2-sabab: Telegram Bot Tokeni nomutanosibligi (401 Unauthorized)
-Ikkita turli token mavjud edi:
-1. `8832100007:AAHjZpn6CKLPgPHPnzUAnRsJR9rqRpTjz8g` (`render.yaml` faylida va Render Dashboard'da o'rnatilgan edi).
-2. `8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0` (`backend/.env` faylida turgan edi).
+Ilgari token nomutanosibligi yuzaga kelgan edi:
+1. Eskirgan token `render.yaml` va Render Dashboard'da qolib ketgan edi.
+2. Yangi token esa `backend/.env` da saqlangan edi.
 
-**Tekshiruv buyruqlari va Telegram javoblari:**
+**Tekshiruv buyrug'i:**
 ```bash
-# 1-token tekshiruvi:
-curl -i "https://api.telegram.org/bot8832100007:AAHjZpn6CKLPgPHPnzUAnRsJR9rqRpTjz8g/getMe"
-# Javob: HTTP/1.1 401 Unauthorized {"ok":false,"error_code":401,"description":"Unauthorized"}
-
-# 2-token tekshiruvi:
-curl -i "https://api.telegram.org/bot8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0/getMe"
-# Javob: HTTP/1.1 200 OK {"ok":true,"result":{"id":8832100007,"username":"usmonshashlik_bot"}}
+# Telegram bot holatini tekshirish:
+curl -i "https://api.telegram.org/bot<SIZNING_BOT_TOKEN>/getMe"
 ```
-**Xulosa:** `AAHj...` tokeni bekor qilingan (eskirgan). Haqiqiy ishlayotgan token — `AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0`.
+* Agar `401 Unauthorized` chiqsa — token bekor qilingan yoki xato kiritilgan.
+* Agar `200 OK` chiqsa — token to'g'ri va bot faol.
 
 ### 3-sabab: Mini App URL xatosi va Node.js halokati (Crash)
 * `bot.js` faylidagi `sendMenu` inline tugmasiga Mini App URL sifatida `http://localhost:3000` ketib qolgan.
@@ -51,12 +46,13 @@ curl -i "https://api.telegram.org/bot8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa
 
 ## 🛠️ 3. Amalga Oshirilgan Yechimlar
 
-### 1. `render.yaml` to'g'rilandi:
-`render.yaml` faylidagi `TELEGRAM_BOT_TOKEN` qiymati yangi, haqiqiy tokenga almashtirildi:
+### 1. `render.yaml` xavfsizlandi:
+`render.yaml` faylida token gitga chiqib ketmasligi uchun `sync: false` qilindi:
 ```yaml
 - key: TELEGRAM_BOT_TOKEN
-  value: 8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0
+  sync: false
 ```
+Token faqat Render.com Dashboard'dagi **Environment** bo'limida saqlanadi.
 
 ### 2. `backend/src/core/bot.js` da xavfsizlik kuchaytirildi:
 * `sendMenu` funksiyasi to'liq `try/catch` blokiga olindi.
@@ -80,7 +76,7 @@ Agar qachondir bot ishlamay qolsa, quyidagi ketma-ketlikda 2 daqiqada tekshiring
 ### 1-qadam. Telegram tokenini tekshiring
 Terminalda buyruq bering:
 ```bash
-curl -i "https://api.telegram.org/bot8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0/getMe"
+curl -i "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getMe"
 ```
 * Agar `HTTP/1.1 200 OK` chiqsa — token to'g'ri.
 * Agar `401 Unauthorized` chiqsa — Telegram `@BotFather` dan yangi token olingan va uni Render Dashboard'da yangilash kerak.
@@ -95,7 +91,7 @@ curl -i "https://usmon-shashlik.onrender.com/api/health"
 ### 3-qadam. Render Dashboard sozlamalarini tekshiring
 * [dashboard.render.com](https://dashboard.render.com) ga kiring.
 * `usmon-shashlik` → **Logs** bo'limida oxirgi xatoliklarni ko'ring.
-* **Environment** bo'limida `TELEGRAM_BOT_TOKEN` qiymati `8832100007:AAEucfq-mUrzMPEzhdll72BjvH1WUqYa3g0` ekanligiga ishonch hosil qiling.
+* **Environment** bo'limida `TELEGRAM_BOT_TOKEN` to'g'ri kiritilganiga ishonch hosil qiling.
 
 ### 4-qadam. Bir vaqtda lokal kompyuterda botni yoqmang
 * Agar Render'da bot ishlab turgan bo'lsa, lokal kompyuteringizda `start-backend.bat` ni yoqmang (yoki `.env` dagi bot tokenini o'chirib turing), aks holda `409 Polling Conflict` yuzaga keladi.

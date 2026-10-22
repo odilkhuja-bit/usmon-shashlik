@@ -16,7 +16,7 @@ Ushbu hujjat AI agentlari (Antigravity va boshqalar) va dasturchilar uchun loyih
 ---
 
 ## 🔑 Telegram Bot Tokeni haqida MUHIM MA'LUMOT
-* ✅ **Haqiqiy faol token:** `8832100007:AAH7tiws8D...` (`backend/.env` va Render Dashboard'da saqlanadi).
+* ✅ **Haqiqiy faol token:** `8986986202:AAFoAOWfbI...` (`backend/.env` va Render Dashboard'da saqlanadi).
 * ⚠️ **XAVFSIZLIK QOIDASI:** Tokenni hech qachon ochiq holda GitHub repozitoriyasiga yoki `render.yaml` ga yozmang! Telegram GitHub'ni avtomatik skanerlab, ochiq chiqqan tokenlarni darhol bloklaydi va hisobni xavfsizlik tekshiruviga tushiradi! `render.yaml` da faqat `sync: false` bo'lishi shart!
 
 ---

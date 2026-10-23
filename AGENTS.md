@@ -42,6 +42,18 @@ Ushbu hujjat AI agentlari (Antigravity va boshqalar) va dasturchilar uchun loyih
 * **Sabab:** Bitta bot tokeni bilan bir vaqtda ikkita joyda (masalan, Render serverda va lokal kompyuterda `npm run dev`) polling ishga tushsa, Telegram `409 Conflict` beradi va ikkala tomonda ham bot uziladi.
 * **Qoida:** Agar bot Render'da ishlayotgan bo'lsa, lokal kompyuterda `start-backend.bat` ni bir vaqtda yoqmaslik yoki alohida test-bot tokendan foydalanish kerak.
 
+### 4. Eski Botning buzilishi va Yangi Botga o'tish (Bot Re-creation)
+* **Sabab:** Avvalgi bot tokeni (`8832100007:...`) ochiq repo skanerlari orqali sizib chiqib, tavsifi spammerlar tomonidan o'zgartirilgan va Telegram tomonidan butunlay bloklangan/o'chirilgan («Удалённый аккаунт»).
+* **Yechim:** `@BotFather` orqali yangi toza bot ochildi: ID: `8986986202`, Username: `@usmonshashlik_bot`. Yangi token `backend/.env` va Render Dashboard'dagi `TELEGRAM_BOT_TOKEN` ga joylandi.
+
+### 5. Render PostgreSQL 30-kunlik muddati va P1001 xatoligi (Database Expiration)
+* **Sabab:** Render Free PostgreSQL ma'lumotlar bazasi 30 kundan so'ng avtomatik «Suspended by Render» holatiga tushadi. Natijada deploy vaqtida `P1001: Can't reach database server` xatosi chiqib, server o'chib qolgan.
+* **Yechim:**
+  1. Render Dashboard'da eski to'xtagan baza o'chirildi (`sudo delete database usmon-shashlik-db`).
+  2. Yangi bepul PostgreSQL baza ochildi (`usmon-shashlik-db`).
+  3. Yangi bazaning `Internal Database URL` manzili nusxalanib, `usmon-shashlik` Web Service -> **Environment** bo'limidagi `DATABASE_URL` ga qo'yildi.
+  4. Server qayta ishga tushganda `prisma db push` va `seed.js` orqali barcha menyu, filiallar va admin avtomatik tiklandi.
+
 ---
 
 ## 🛠️ Tezkor diagnostika buyruqlari

@@ -67,13 +67,33 @@ Token faqat Render.com Dashboard'dagi **Environment** bo'limida saqlanadi.
 * **Bulutli Pinger (GitHub Actions):** `.github/workflows/keep-alive.yml` fayli orqali GitHub serverlari har 10 daqiqada Render'ga avtomatik so'rov jo'natib turadi (kompyuter o'chiq bo'lsa ham ishlaydi).
 * **Lokal Pinger (Fon skripti):** `scripts/pinger.js` va `start-pinger.bat` yaratildi va fonda ishga tushirildi.
 
+### 5-sabab: Eski botning bloklanishi va yangi bot yaratilishi
+* **Muammo:** Ochiq repo tufayli bot tokeni sizib chiqib, tavsifi spammerlar tomonidan `@bratsese` ga o'zgartirilgan va Telegram ushbu botni qoidalarni buzgani uchun butunlay o'chirib tashlagan («Удалённый аккаунт»).
+* **Yechim:** `@BotFather` orqali yangi toza bot ochildi: `@usmonshashlik_bot` (ID: `8986986202`). Token `backend/.env` va Render Dashboard'dagi `TELEGRAM_BOT_TOKEN` ga o'rnatildi.
+
+### 6-sabab: Render Free PostgreSQL 30-kunlik muddati va P1001 xatoligi
+* **Muammo:** Render bepul PostgreSQL ma'lumotlar bazalarini har 30 kunda avtomatik to'xtatadi («Suspended by Render»). Natijada Node server bazaga ulana olmasdan deploy vaqtida `Error: P1001: Can't reach database server at dpg-...:5432` xatoligi bilan to'xtab qolgan.
+* **Yechim:**
+  1. Render Dashboard'dan eski to'xtagan baza o'chirildi (`sudo delete database usmon-shashlik-db`).
+  2. Yangi bepul PostgreSQL baza ochildi (`usmon-shashlik-db`).
+  3. Yangi bazaning `Internal Database URL` manzili nusxalanib, `usmon-shashlik` Web Service -> **Environment** bo'limidagi `DATABASE_URL` ga kiritildi.
+  4. Server ishga tushganda `prisma db push` va `seed.js` orqali menyu, filiallar va admin avtomatik tiklandi.
+
 ---
 
 ## 🚨 4. Kelajakda Muammo Bo'lsa — Tezkor Qadamlar (Checklist)
 
 Agar qachondir bot ishlamay qolsa, quyidagi ketma-ketlikda 2 daqiqada tekshiring:
 
-### 1-qadam. Telegram tokenini tekshiring
+### 1-qadam. Render PostgreSQL bazasini tekshiring (Har 30 kunda!)
+* [dashboard.render.com](https://dashboard.render.com) ga kiring.
+* Agar **`usmon-shashlik-db`** yonida qizil **`Suspended by Render`** yozuvi tursa:
+  1. Uni o'chiring (`Delete Database`).
+  2. Yangi `usmon-shashlik-db` yarating (`+ New` -> `PostgreSQL`, Plan: `Free`).
+  3. Yangi bazaning `Internal Database URL` ini nusxalab, `usmon-shashlik` -> **Environment** -> `DATABASE_URL` ga qo'ying va saqlang.
+  *Ma'lumotlar avtomatik `seed.js` orqali qayta to'ldiriladi!*
+
+### 2-qadam. Telegram tokenini tekshiring
 Terminalda buyruq bering:
 ```bash
 curl -i "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getMe"
@@ -81,17 +101,17 @@ curl -i "https://api.telegram.org/bot<TELEGRAM_BOT_TOKEN>/getMe"
 * Agar `HTTP/1.1 200 OK` chiqsa — token to'g'ri.
 * Agar `401 Unauthorized` chiqsa — Telegram `@BotFather` dan yangi token olingan va uni Render Dashboard'da yangilash kerak.
 
-### 2-qadam. Render serverining holatini tekshiring
+### 3-qadam. Render serverining holatini tekshiring
 ```bash
 curl -i "https://usmon-shashlik.onrender.com/api/health"
 ```
 * Agar `{"status":"ok"}` chiqsa — Render uyg'oq va server ishlamoqda.
 * Agar uzoq kutib javob bermasa — Render uxlab qolgan yoki qayta ishga tushmoqda.
 
-### 3-qadam. Render Dashboard sozlamalarini tekshiring
+### 4-qadam. Render Dashboard sozlamalarini tekshiring
 * [dashboard.render.com](https://dashboard.render.com) ga kiring.
 * `usmon-shashlik` → **Logs** bo'limida oxirgi xatoliklarni ko'ring.
 * **Environment** bo'limida `TELEGRAM_BOT_TOKEN` to'g'ri kiritilganiga ishonch hosil qiling.
 
-### 4-qadam. Bir vaqtda lokal kompyuterda botni yoqmang
+### 5-qadam. Bir vaqtda lokal kompyuterda botni yoqmang
 * Agar Render'da bot ishlab turgan bo'lsa, lokal kompyuteringizda `start-backend.bat` ni yoqmang (yoki `.env` dagi bot tokenini o'chirib turing), aks holda `409 Polling Conflict` yuzaga keladi.
